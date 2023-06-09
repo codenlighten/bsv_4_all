@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>BSV Transactions</title>
+		<script src="https://cdn.jsdelivr.net/npm/bsv@1.5.0/bsv.min.js"></script>
+		<!-- qrious -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				font-family: sans-serif;
+				margin: 0;
+				padding: 0;
+			}
+			#container {
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#generateKeys {
+				background-color: #4caf50;
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: block;
+				font-size: 16px;
+				margin: 0 auto;
+				cursor: pointer;
+			}
+			#sendMessage {
+				background-color: #4caf50;
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: block;
+				font-size: 16px;
+				margin: 0 auto;
+				cursor: pointer;
+			}
+			#keys {
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#keys h2 {
+				text-align: center;
+			}
+			#keys div {
+				margin: 10px 0;
+			}
+			#keys canvas {
+				display: block;
+				margin: 0 auto;
+			}
+			#title {
+				text-align: center;
+			}
+			.container {
+				margin: 10px 0;
+				text-align: center;
+				text-shadow: #4caf50 0px 0px 10px;
+				word-wrap: break-word;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">
+			<h1 id="title">BSV 4 ALL</h1>
+			<div id="generate" class="container">
+				<button id="generateKeys">Generate Keys</button>
+			</div>
+			<div id="message" class="container">
+				<button id="sendMessage">Send Message</button>
+			</div>
+			<div id="sendBsv" class="container">
+				<input placeholder="recipient address" id="recipient" type="text" />
+				<input placeholder="amount" id="amount" type="text" />
+				<button id="sendBSV">Send BSV</button>
+			</div>
+			<div class="container" id="keys">
+				<h2>Keys</h2>
+				<div id="address"></div>
+				<div id="balance"></div>
+				<div id="wif"></div>
+				<canvas id="qrcode"></canvas>
+			</div>
+		</div>
+		<script>
+			document.getElementById("generateKeys").onclick = async () => {
+				const privateKey = new bsv.PrivateKey.fromRandom();
+				const publicKey = bsv.PublicKey.fromPrivateKey(privateKey);
+				const address = bsv.Address.fromPrivateKey(privateKey).toString();
+				const wif = privateKey.toWIF();
+				const keys = {
+					privateKey: privateKey.toString(),
+					publicKey: publicKey.toString(),
+					address,
+					wif,
+				};
+				localStorage.setItem("keys", JSON.stringify(keys));
+				alert("Keys generated and stored in local storage.");
+				// reload
+				location.reload();
+			};
+
+			document.getElementById("sendBSV").onclick = async () => {
+				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				const recipient = document.getElementById("recipient").value;
+				const amount = document.getElementById("amount").value;
+				const res = await fetch(
+					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
+				);
+				const utxosJSON = await res.json();
+				const tx = new bsv.Transaction()
+					.from(utxosJSON)
+					.to(recipient, amount)
+					.change(address);
+				tx.sign(bsv.PrivateKey.fromWIF(wif));
+				const txResponse = await fetch(
+					"https://api.whatsonchain.com/v1/bsv/main/tx/raw",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							txhex: tx.toString(),
+						}),
+					}
+				);
+				const txResponseJSON = await txResponse.json();
+				console.log(txResponseJSON);
+				alert("Transaction sent!");
+			};
+
+			document.getElementById("sendMessage").onclick = async () => {
+				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				const amount = 1000; // Satoshis
+				const message = "Hello world";
+				const res = await fetch(
+					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
+				);
+				const utxosJSON = await res.json();
+				const tx = new bsv.Transaction()
+					.from(utxosJSON)
+					.to(address, amount)
+					.change(address);
+				tx.addData(message);
+				tx.sign(bsv.PrivateKey.fromWIF(wif));
+				const txResponse = await fetch(
+					"https://api.whatsonchain.com/v1/bsv/main/tx/raw",
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ txhex: tx.serialize() }),
+					}
+				);
+				const { txid } = await txResponse.json();
+				alert(`Transaction broadcasted. Txid: ${txid}`);
+			};
+			const balance = async (address) => {
+				const balance = await fetch(
+					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/balance`
+				);
+				const balanceJSON = await balance.json();
+				document.getElementById("balance").innerHTML = `Balance: ${
+					balanceJSON.confirmed / 100000000 +
+					balanceJSON.unconfirmed / 100000000
+				} BSV`;
+			};
+			if (localStorage.keys) {
+				// create qr code of address
+				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				balance(address);
+				const qr = new QRious({
+					element: document.getElementById("qrcode"),
+					value: address,
+					size: 200,
+				});
+				document.getElementById(
+					"address"
+				).innerHTML = `<a href="https://whatsonchain.com/address/${address}" target="_blank">${address}</a>`;
+				const wifEl = document.getElementById("wif");
+				wifEl.innerHTML = `*****Reveal WIF****`;
+				wifEl.onclick = () => {
+					if (wifEl.innerHTML.includes("Reveal")) {
+						wifEl.innerHTML = `Private WIF: ${wif}`;
+					} else {
+						wifEl.innerHTML = `*****Reveal WIF****`;
+					}
+				};
+			}
+		</script>
+	</body>
+</html>
