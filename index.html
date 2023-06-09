@@ -4,10 +4,21 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>BSV Transactions</title>
+		<!-- favicon -->
+		<link rel="shortcut icon" href="logo.png" type="image/x-icon" />
+		<!-- twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@bsv4all" />
+		<meta name="twitter:creator" content="@bsv4all" />
+		<meta name="twitter:title" content="BSV 4 All" />
+		<meta name="twitter:description" content="BSV 4 All" />
+		<meta name="twitter:image" content="https://bsv4all.com/logo.png" />
+		<!-- open graph -->
 		<script src="https://cdn.jsdelivr.net/npm/bsv@1.5.0/bsv.min.js"></script>
 		<!-- qrious -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+		<link rel="manifest" href="/manifest.json" />
+
 		<style>
 			* {
 				box-sizing: border-box;
@@ -16,6 +27,8 @@
 				font-family: sans-serif;
 				margin: 0;
 				padding: 0;
+				background-color: #221f1f;
+				color: #4caf50;
 			}
 			#container {
 				margin: 0 auto;
@@ -72,11 +85,21 @@
 				text-shadow: #4caf50 0px 0px 10px;
 				word-wrap: break-word;
 			}
+			#logo {
+				display: block;
+				margin: 0 auto;
+				width: 50%;
+				max-width: 300px;
+				margin: auto;
+				border-radius: 23%;
+			}
 		</style>
+		<title>BSV 4 All</title>
 	</head>
 	<body>
 		<div id="container">
 			<h1 id="title">BSV 4 ALL</h1>
+			<img src="./logo.png" alt="" id="logo" />
 			<div id="generate" class="container">
 				<button id="generateKeys">Generate Keys</button>
 			</div>
