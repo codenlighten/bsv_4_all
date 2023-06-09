@@ -36,6 +36,54 @@
 				max-width: 600px;
 				padding: 20px;
 			}
+			#message {
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#message input {
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#generate {
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#generate input {
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#sendBsv {
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#sendBsv input {
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+
+			#sendBsv button {
+				background-color: #4caf50;
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: block;
+				font-size: 16px;
+				margin: 0 auto;
+				cursor: pointer;
+				margin: 6px auto;
+			}
+
 			#generateKeys {
 				background-color: #4caf50;
 				border: none;
@@ -47,6 +95,7 @@
 				font-size: 16px;
 				margin: 0 auto;
 				cursor: pointer;
+				margin: 6px auto;
 			}
 			#sendMessage {
 				background-color: #4caf50;
@@ -60,6 +109,84 @@
 				margin: 0 auto;
 				cursor: pointer;
 			}
+			#sendBsv button:hover {
+				background-color: #3e8e41;
+			}
+			#sendBsv button:active {
+				background-color: #3e8e41;
+			}
+			#sendBsv button:visited {
+				background-color: #3e8e41;
+			}
+			#sendBsv button:link {
+				background-color: #3e8e41;
+			}
+			#generateKeys:hover {
+				background-color: #3e8e41;
+			}
+			#generateKeys:active {
+				background-color: #3e8e41;
+			}
+			#generateKeys:visited {
+				background-color: #3e8e41;
+			}
+			#generateKeys:link {
+				background-color: #3e8e41;
+			}
+			#sendMessage:hover {
+				background-color: #3e8e41;
+			}
+			#sendMessage:active {
+				background-color: #3e8e41;
+			}
+			#sendMessage:visited {
+				background-color: #3e8e41;
+			}
+			#sendMessage:link {
+				background-color: #3e8e41;
+			}
+			#generateKeys button {
+				background-color: #4caf50;
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: block;
+				font-size: 16px;
+				margin: 0 auto;
+				cursor: pointer;
+				margin: 6px auto;
+			}
+			#results {
+				display: none;
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#results input {
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
+			#results button {
+				background-color: #4caf50;
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: block;
+				font-size: 16px;
+				margin: 0 auto;
+				cursor: pointer;
+				margin: 6px auto;
+			}
+			#results button:hover {
+				background-color: #3e8e41;
+			}
+
 			#keys {
 				margin: 0 auto;
 				width: 100%;
@@ -93,6 +220,18 @@
 				margin: auto;
 				border-radius: 23%;
 			}
+			#logo:hover {
+				opacity: 0.5;
+			}
+			#logo:active {
+				opacity: 0.5;
+			}
+			#logo:visited {
+				opacity: 0.5;
+			}
+			#logo:link {
+				opacity: 0.5;
+			}
 		</style>
 		<title>BSV 4 All</title>
 	</head>
@@ -104,6 +243,7 @@
 				<button id="generateKeys">Generate Keys</button>
 			</div>
 			<div id="message" class="container">
+				<input placeholder="message" id="message" type="text" />
 				<button id="sendMessage">Send Message</button>
 			</div>
 			<div id="sendBsv" class="container">
@@ -117,6 +257,11 @@
 				<div id="balance"></div>
 				<div id="wif"></div>
 				<canvas id="qrcode"></canvas>
+			</div>
+			<div id="results" class="container">
+				<h2>Results</h2>
+				<div id="transaction"></div>
+				<div id="message"></div>
 			</div>
 		</div>
 		<script>
@@ -164,13 +309,17 @@
 				);
 				const txResponseJSON = await txResponse.json();
 				console.log(txResponseJSON);
+				document.getElementById("transaction").innerHTML = txResponseJSON.txid;
+				// results div
+				document.getElementById("results").style.display = "block";
+
 				alert("Transaction sent!");
 			};
 
 			document.getElementById("sendMessage").onclick = async () => {
 				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
 				const amount = 1000; // Satoshis
-				const message = "Hello world";
+				const message = document.getElementById("message").value;
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
 				);
@@ -190,6 +339,13 @@
 					}
 				);
 				const { txid } = await txResponse.json();
+
+				document.getElementById("transaction").innerHTML = txid;
+				// message div
+				document.getElementById("message").innerHTML = message;
+				// results div
+				document.getElementById("results").style.display = "block";
+
 				alert(`Transaction broadcasted. Txid: ${txid}`);
 			};
 			const balance = async (address) => {
