@@ -293,7 +293,7 @@
 			<div id="results" class="container">
 				<h2>Results</h2>
 				<div id="transaction"></div>
-				<div id="message"></div>
+				<div id="messageResults"></div>
 			</div>
 		</div>
 		<script>
@@ -327,11 +327,20 @@
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
 				);
+				let scriptAddress = bsv.Address.fromString(address);
+				let scriptFromAddress = bsv.Script.fromAddress(scriptAddress);
+				let script = scriptFromAddress.toHex();
 				const utxosJSON = await res.json();
-				const tx = new bsv.Transaction()
-					.from(utxosJSON)
-					.to(recipient, amount)
-					.change(address);
+				const utxos = utxosJSON.map((utxo) => ({
+					txid: utxo.tx_hash,
+					vout: utxo.tx_pos,
+					script: script,
+					satoshis: utxo.value,
+				}));
+				const tx = new bsv.Transaction();
+				tx.from(utxos);
+				tx.to(recipient, amount);
+				tx.change(address);
 				tx.sign(bsv.PrivateKey.fromWIF(wif));
 				const txResponse = await fetch(
 					"https://api.whatsonchain.com/v1/bsv/main/tx/raw",
@@ -361,12 +370,26 @@
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
 				);
+				let scriptAddress = bsv.Address.fromString(address);
+				let scriptFromAddress = bsv.Script.fromAddress(scriptAddress);
+				let script = scriptFromAddress.toHex();
 				const utxosJSON = await res.json();
-				const tx = new bsv.Transaction()
-					.from(utxosJSON)
-					.to(address, amount)
-					.change(address);
-				tx.addData(message);
+				console.log(utxosJSON);
+				const utxos = utxosJSON.map((utxo) => ({
+					txid: utxo.tx_hash,
+					vout: utxo.tx_pos,
+					script: script,
+					satoshis: utxo.value,
+				}));
+				const tx = new bsv.Transaction();
+				tx.addOutput(
+					new bsv.Transaction.Output({
+						script: bsv.Script.buildSafeDataOut([btoa(message)]),
+						satoshis: 0,
+					})
+				);
+				tx.from(utxos);
+				tx.change(address);
 				tx.sign(bsv.PrivateKey.fromWIF(wif));
 				const txResponse = await fetch(
 					"https://api.whatsonchain.com/v1/bsv/main/tx/raw",
@@ -376,12 +399,17 @@
 						body: JSON.stringify({ txhex: tx.serialize() }),
 					}
 				);
-				const { txid } = await txResponse.json();
+				const txid = await txResponse.json();
 
-				document.getElementById("transaction").innerHTML = txid;
+				document.getElementById(
+					"transaction"
+				).innerHTML = `Transaction: ${txid}`;
 				// message div
-				document.getElementById("message").innerHTML = message;
+				document.getElementById(
+					"messageResults"
+				).innerHTML = `Message: ${message}`;
 				// results div
+				document.getElementById("message").value = "";
 				document.getElementById("results").style.display = "block";
 
 				alert(`Transaction broadcasted. Txid: ${txid}`);
