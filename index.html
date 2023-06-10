@@ -407,7 +407,7 @@
 				});
 				document.getElementById(
 					"address"
-				).innerHTML = `<a href="https://whatsonchain.com/address/${address}" target="_blank">${address}</a>`;
+				).innerHTML = `<a href="bitcoin:${address}">Click to fund: ${address}</a>`;
 				const wifEl = document.getElementById("wif");
 				wifEl.innerHTML = `*****Reveal WIF****`;
 				wifEl.onclick = () => {
