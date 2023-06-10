@@ -391,7 +391,7 @@
 				const tx = new bsv.Transaction();
 				tx.addOutput(
 					new bsv.Transaction.Output({
-						script: bsv.Script.buildSafeDataOut([btoa(message)]),
+						script: bsv.Script.buildSafeDataOut([btoa(message)], "base64"),
 						satoshis: 0,
 					})
 				);
