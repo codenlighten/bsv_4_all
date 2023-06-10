@@ -28,14 +28,14 @@
 				margin: 0;
 				padding: 0;
 				background-color: black;
-				color: #4caf50;
+				color: #5e17eb;
 			}
 			#container {
 				margin: 0 auto;
 				width: 100%;
 				max-width: 600px;
 				padding: 20px;
-				border: #3e8e41 7px solid;
+				border: #5e17eb 7px solid;
 			}
 			#message {
 				margin: 0 auto;
@@ -72,7 +72,7 @@
 			}
 
 			#sendBsv button {
-				background-color: #4caf50;
+				background-color: #5e17eb;
 				border: none;
 				color: white;
 				padding: 15px 32px;
@@ -86,7 +86,7 @@
 			}
 
 			#generateKeys {
-				background-color: #4caf50;
+				background-color: #5e17eb;
 				border: none;
 				color: white;
 				padding: 15px 32px;
@@ -99,7 +99,7 @@
 				margin: 6px auto;
 			}
 			#sendMessage {
-				background-color: #4caf50;
+				background-color: #5e17eb;
 				border: none;
 				color: white;
 				padding: 15px 32px;
@@ -111,43 +111,43 @@
 				cursor: pointer;
 			}
 			#sendBsv button:hover {
-				background-color: #363299;
+				background-color: #3e8e41;
 			}
 			#sendBsv button:active {
-				background-color: purple;
+				background-color: #5e17eb;
 			}
 			#sendBsv button:visited {
 				background-color: #363299;
 			}
 			#sendBsv button:link {
-				background-color: #4caf50;
+				background-color: #5e17eb;
 			}
 			#generateKeys:hover {
-				background-color: #363299;
+				background-color: #3e8e41;
 			}
 			#generateKeys:active {
-				background-color: #ffffff;
+				background-color: #5e17eb;
 			}
 			#generateKeys:visited {
-				background-color: #4caf50;
-			}
-			#generateKeys:link {
-				background-color: #4caf50;
-			}
-			#sendMessage:hover {
 				background-color: #363299;
 			}
+			#generateKeys:link {
+				background-color: #363299;
+			}
+			#sendMessage:hover {
+				background-color: #3e8e41;
+			}
 			#sendMessage:active {
-				background-color: purple;
+				background-color: #5e17eb;
 			}
 			#sendMessage:visited {
 				background-color: #363299;
 			}
 			#sendMessage:link {
-				background-color: #4caf50;
+				background-color: #363299;
 			}
 			#generateKeys button {
-				background-color: #4caf50;
+				background-color: #363299;
 				border: none;
 				color: white;
 				padding: 15px 32px;
@@ -172,7 +172,7 @@
 				padding: 20px;
 			}
 			#results button {
-				background-color: #4caf50;
+				background-color: #363299;
 				border: none;
 				color: white;
 				padding: 15px 32px;
@@ -185,7 +185,7 @@
 				margin: 6px auto;
 			}
 			#results button:hover {
-				background-color: #3e8e41;
+				background-color: #363299;
 			}
 
 			#keys {
@@ -222,10 +222,10 @@
 				max-width: 369px;
 				margin: auto;
 				border-radius: 33%;
-				border: #4caf50 2px solid;
+				border: #5e17eb 2px solid;
 			}
 			#logo:hover {
-				border: #363299 2px solid;
+				border: #3e8e41 2px solid;
 			}
 			#address {
 				text-align: center;
@@ -234,10 +234,36 @@
 				line-height: 1.5;
 			}
 			#address a {
-				color: #4caf50;
+				color: #5e17eb;
 			}
 			#address a:hover {
-				color: #363299;
+				color: #3e8e41;
+			}
+
+			.btn {
+				background-color: #5e17eb;
+				border: none;
+				color: white;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: block;
+				font-size: 16px;
+				margin: 6px auto;
+				cursor: pointer;
+			}
+
+			.btn:hover {
+				background-color: #3e8e41;
+			}
+
+			.btn:active {
+				background-color: #244872;
+			}
+
+			.btn:focus {
+				outline: none;
+				box-shadow: 0 0 0 2px #3e8e41;
 			}
 		</style>
 		<title>BSV 4 All</title>
@@ -247,16 +273,16 @@
 			<!-- <h1 id="title">BSV 4 ALL</h1> -->
 			<img src="./logo.png" alt="" id="logo" />
 			<div id="generate" class="container">
-				<button id="generateKeys">Generate Keys</button>
+				<button class="btn" id="generateKeys">Generate Keys</button>
 			</div>
 			<div id="message" class="container">
 				<input placeholder="message" id="message" type="text" />
-				<button id="sendMessage">Send Message</button>
+				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
 			<div id="sendBsv" class="container">
 				<input placeholder="recipient address" id="recipient" type="text" />
 				<input placeholder="amount" id="amount" type="text" />
-				<button id="sendBSV">Send BSV</button>
+				<button class="btn" id="sendBSV">Send BSV</button>
 			</div>
 			<div class="container" id="keys">
 				<div id="address"></div>
@@ -272,6 +298,12 @@
 		</div>
 		<script>
 			document.getElementById("generateKeys").onclick = async () => {
+				if (
+					confirm(
+						"Are you sure you want to generate new keys? All previous keys will be lost."
+					) == false
+				)
+					return;
 				const privateKey = new bsv.PrivateKey.fromRandom();
 				const publicKey = bsv.PublicKey.fromPrivateKey(privateKey);
 				const address = bsv.Address.fromPrivateKey(privateKey).toString();
