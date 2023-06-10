@@ -43,7 +43,8 @@
 				max-width: 600px;
 				padding: 20px;
 			}
-			#message input {
+			#message input,
+			#messageContainer input {
 				width: 100%;
 				max-width: 600px;
 				padding: 20px;
@@ -65,7 +66,8 @@
 				max-width: 600px;
 				padding: 20px;
 			}
-			#sendBsv input {
+			#sendBsv input,
+			#sendBsvContainer input {
 				width: 100%;
 				max-width: 600px;
 				padding: 20px;
@@ -275,11 +277,11 @@
 			<div id="generate" class="container">
 				<button class="btn" id="generateKeys">Generate Keys</button>
 			</div>
-			<div id="message" class="container">
+			<div id="messageContainer" class="container">
 				<input placeholder="message" id="message" type="text" />
 				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
-			<div id="sendBsv" class="container">
+			<div id="sendBsvContainer" class="container">
 				<input placeholder="recipient address" id="recipient" type="text" />
 				<input placeholder="amount" id="amount" type="text" />
 				<button class="btn" id="sendBSV">Send BSV</button>
@@ -339,7 +341,8 @@
 				}));
 				const tx = new bsv.Transaction();
 				tx.from(utxos);
-				tx.to(recipient, amount);
+				tx.feePerKb(50);
+				tx.to(recipient, parseInt(amount));
 				tx.change(address);
 				tx.sign(bsv.PrivateKey.fromWIF(wif));
 				const txResponse = await fetch(
@@ -356,17 +359,21 @@
 				);
 				const txResponseJSON = await txResponse.json();
 				console.log(txResponseJSON);
-				document.getElementById("transaction").innerHTML = txResponseJSON.txid;
+				document.getElementById("transaction").innerHTML = `
+          <p>Transaction ID: <a href="https://whatsonchain.com/tx/${txResponseJSON}" target="_blank">${txResponseJSON}</a></p>
+        `;
 				// results div
 				document.getElementById("results").style.display = "block";
-
+				document.getElementById("messageResults").innerHTML = "";
+				document.getElementById("amount").value = "";
 				alert("Transaction sent!");
 			};
 
 			document.getElementById("sendMessage").onclick = async () => {
 				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
-				const amount = 1000; // Satoshis
+				// const amount = 1000; // Satoshis
 				const message = document.getElementById("message").value;
+				console.log(message);
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
 				);
@@ -388,6 +395,7 @@
 						satoshis: 0,
 					})
 				);
+				tx.feePerKb(50);
 				tx.from(utxos);
 				tx.change(address);
 				tx.sign(bsv.PrivateKey.fromWIF(wif));
