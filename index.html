@@ -303,6 +303,8 @@
 				<button class="btn" id="generateKeys">Generate Keys</button>
 			</div>
 			<div id="messageContainer" class="container">
+				<label for="">Encrypt Message?</label>
+				<input type="checkbox" id="encryptMessage" />
 				<input placeholder="message" id="message" type="text" />
 				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
@@ -409,7 +411,14 @@
 			document.getElementById("sendMessage").onclick = async () => {
 				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
 				// const amount = 1000; // Satoshis
-				const message = document.getElementById("message").value;
+				let message = document.getElementById("message").value;
+				const encryptionCheck =
+					document.getElementById("encryptMessage").checked;
+				console.log(encryptionCheck);
+				if (encryptionCheck) {
+					const password = prompt("Enter password to encrypt message");
+					message = await encrypt(password, message);
+				}
 				console.log(message);
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
