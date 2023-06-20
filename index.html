@@ -460,7 +460,9 @@
 					alert("Please enter a password and amount");
 					return;
 				}
-				const encrypted = await encrypt(keyObject, password);
+				const encrypted = await encrypt(password, keyObject);
+				const decrypted = await decrypt(password, encrypted);
+				console.log(encrypted, decrypted);
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
 				);
@@ -479,7 +481,12 @@
 				tx.addOutput(
 					new bsv.Transaction.Output({
 						script: bsv.Script.buildSafeDataOut(
-							[btoa(encrypted), btoa(receivingAddress), btoa(amount)],
+							[
+								btoa(encrypted),
+								btoa(receivingAddress),
+								btoa(amount),
+								btoa("private, use for good"),
+							],
 							"base64"
 						),
 						satoshis: 0,
@@ -521,6 +528,7 @@
 				});
 				document.getElementById("privateQrCode").style.padding = "10px";
 				document.getElementById("privateQrAddress").style.padding = "10px";
+
 				alert(`Transaction broadcasted. Txid: ${txid}`);
 			};
 			const balance = async (address) => {
