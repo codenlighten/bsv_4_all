@@ -329,6 +329,11 @@
 				<label for="">Encrypt Message?</label>
 				<input type="checkbox" id="encryptMessage" />
 				<input placeholder="message" id="message" type="text" />
+				<input
+					placeholder="optionalRecipient"
+					type="text"
+					id="optionalRecipient"
+				/>
 				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
 			<div id="results" class="container">
@@ -435,6 +440,7 @@
 				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
 				// const amount = 1000; // Satoshis
 				let message = document.getElementById("message").value;
+				const optionalRecipient = document.getElementById("optionalRecipient");
 				const encryptionCheck =
 					document.getElementById("encryptMessage").checked;
 				console.log(encryptionCheck);
@@ -457,7 +463,11 @@
 					script: script,
 					satoshis: utxo.value,
 				}));
+
 				const tx = new bsv.Transaction();
+				if (optionalRecipient.value.length > 1) {
+					tx.to(optionalRecipient.value, 1000);
+				}
 				tx.addOutput(
 					new bsv.Transaction.Output({
 						script: bsv.Script.buildSafeDataOut([btoa(message)], "base64"),
