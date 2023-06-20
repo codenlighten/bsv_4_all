@@ -14,6 +14,7 @@
 		<meta name="twitter:description" content="BSV 4 All" />
 		<meta name="twitter:image" content="https://bsv4all.com/logo.png" />
 		<!-- open graph -->
+		<script src="./encryption.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/bsv@1.5.0/bsv.min.js"></script>
 		<!-- qrious -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -281,8 +282,21 @@
 				<input placeholder="message" id="message" type="text" />
 				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
+			<div id="privateMoney" class="container">
+				<input id="privateAmount" placeholder="amount" type="text" />
+				<input
+					placeholder="enter encrypt key"
+					type="password"
+					id="privatePassword"
+				/>
+				<button class="btn" id="sendPrivateMoney">Send Private Money</button>
+				<h3 id="privateAddress"></h3>
+				<h5 id="privateTxid"></h5>
+				<canvas id="privateQrAddress"></canvas>
+				<canvas id="privateQrCode"></canvas>
+			</div>
 			<div id="sendBsvContainer" class="container">
-				<input placeholder="recipient address" id="recipient" type="text" />
+				<input placeholder="recipient address" id="recipient type="text" />
 				<input placeholder="amount" id="amount" type="text" />
 				<button class="btn" id="sendBSV">Send BSV</button>
 			</div>
@@ -298,6 +312,7 @@
 				<div id="messageResults"></div>
 			</div>
 		</div>
+		<script src="./crypt.js"></script>
 		<script>
 			document.getElementById("generateKeys").onclick = async () => {
 				if (
@@ -420,6 +435,92 @@
 				document.getElementById("message").value = "";
 				document.getElementById("results").style.display = "block";
 
+				alert(`Transaction broadcasted. Txid: ${txid}`);
+			};
+
+			document.getElementById("sendPrivateMoney").onclick = async () => {
+				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				// const amount = 1000; // Satoshis
+				const password = document.getElementById("privatePassword").value;
+				const amount = document.getElementById("privateAmount").value;
+				const privateKey = new bsv.PrivateKey.fromRandom();
+				const publicKey = bsv.PublicKey.fromPrivateKey(privateKey);
+				const receivingAddress =
+					bsv.Address.fromPrivateKey(privateKey).toString();
+				const receivingWif = privateKey.toWIF();
+				const keys = {
+					privateKey: privateKey.toString(),
+					publicKey: publicKey.toString(),
+					address: receivingAddress,
+					wif: receivingWif,
+				};
+				const keyObject = JSON.stringify(keys);
+				console.log(keyObject);
+				if (!password || !amount) {
+					alert("Please enter a password and amount");
+					return;
+				}
+				const encrypted = await encrypt(keyObject, password);
+				const res = await fetch(
+					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`
+				);
+				let scriptAddress = bsv.Address.fromString(address);
+				let scriptFromAddress = bsv.Script.fromAddress(scriptAddress);
+				let script = scriptFromAddress.toHex();
+				const utxosJSON = await res.json();
+				console.log(utxosJSON);
+				const utxos = utxosJSON.map((utxo) => ({
+					txid: utxo.tx_hash,
+					vout: utxo.tx_pos,
+					script: script,
+					satoshis: utxo.value,
+				}));
+				const tx = new bsv.Transaction();
+				tx.addOutput(
+					new bsv.Transaction.Output({
+						script: bsv.Script.buildSafeDataOut(
+							[btoa(encrypted), btoa(receivingAddress), btoa(amount)],
+							"base64"
+						),
+						satoshis: 0,
+					})
+				);
+				tx.feePerKb(50);
+				tx.from(utxos);
+				tx.change(address);
+				tx.to(receivingAddress, parseInt(amount));
+				tx.sign(bsv.PrivateKey.fromWIF(wif));
+				const txResponse = await fetch(
+					"https://api.whatsonchain.com/v1/bsv/main/tx/raw",
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ txhex: tx.serialize() }),
+					}
+				);
+				const txid = await txResponse.json();
+
+				document.getElementById(
+					"privateTxid"
+				).innerHTML = `Transaction ID: <a href="https://whatsonchain.com/tx/${txid}" target="_blank">${txid}</a>`;
+				// message div
+				document.getElementById(
+					"privateAddress"
+				).innerHTML = `Address: ${receivingAddress}`;
+				// results div
+				// qr code of txid
+				const qr = new QRious({
+					element: document.getElementById("privateQrAddress"),
+					value: `bitcoin:${address}`,
+					size: 200,
+				});
+				const qr2 = new QRious({
+					element: document.getElementById("privateQrCode"),
+					value: `https://plugins.whatsonchain.com/api/plugin/main/${txid}`,
+					size: 200,
+				});
+				document.getElementById("privateQrCode").style.padding = "10px";
+				document.getElementById("privateQrAddress").style.padding = "10px";
 				alert(`Transaction broadcasted. Txid: ${txid}`);
 			};
 			const balance = async (address) => {
