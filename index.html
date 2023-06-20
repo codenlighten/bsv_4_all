@@ -268,6 +268,24 @@
 				outline: none;
 				box-shadow: 0 0 0 2px #3e8e41;
 			}
+			#privateResults {
+				display: none;
+				margin: 0 auto;
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+				text-shadow: #363299 0px 0px 3px;
+			}
+			#privateResults h2 {
+				text-align: center;
+			}
+			#privateResults div {
+				margin: 10px 0;
+			}
+			#privateResults canvas {
+				display: block;
+				margin: 0 auto;
+			}
 		</style>
 		<title>BSV4All</title>
 	</head>
@@ -275,6 +293,12 @@
 		<div id="container">
 			<!-- <h1 id="title">BSV 4 ALL</h1> -->
 			<img src="./logo.png" alt="" id="logo" />
+			<div class="container" id="keys">
+				<div id="address"></div>
+				<div id="balance"></div>
+				<div id="wif"></div>
+				<canvas id="qrcode"></canvas>
+			</div>
 			<div id="generate" class="container">
 				<button class="btn" id="generateKeys">Generate Keys</button>
 			</div>
@@ -282,6 +306,18 @@
 				<input placeholder="message" id="message" type="text" />
 				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
+			<div id="results" class="container">
+				<h2>Results</h2>
+				<div id="transaction"></div>
+				<div id="messageResults"></div>
+			</div>
+
+			<div id="sendBsvContainer" class="container">
+				<input placeholder="recipient address" id="recipient type="text" />
+				<input placeholder="amount" id="amount" type="text" />
+				<button class="btn" id="sendBSV">Send BSV</button>
+			</div>
+
 			<div id="privateMoney" class="container">
 				<input id="privateAmount" placeholder="amount" type="text" />
 				<input
@@ -290,26 +326,12 @@
 					id="privatePassword"
 				/>
 				<button class="btn" id="sendPrivateMoney">Send Private Money</button>
-				<h3 id="privateAddress"></h3>
-				<h5 id="privateTxid"></h5>
-				<canvas id="privateQrAddress"></canvas>
-				<canvas id="privateQrCode"></canvas>
-			</div>
-			<div id="sendBsvContainer" class="container">
-				<input placeholder="recipient address" id="recipient type="text" />
-				<input placeholder="amount" id="amount" type="text" />
-				<button class="btn" id="sendBSV">Send BSV</button>
-			</div>
-			<div class="container" id="keys">
-				<div id="address"></div>
-				<div id="balance"></div>
-				<div id="wif"></div>
-				<canvas id="qrcode"></canvas>
-			</div>
-			<div id="results" class="container">
-				<h2>Results</h2>
-				<div id="transaction"></div>
-				<div id="messageResults"></div>
+				<div id="privateResults">
+					<h3 id="privateAddress"></h3>
+					<h5 id="privateTxid"></h5>
+					<canvas id="privateQrAddress"></canvas>
+					<canvas id="privateQrCode"></canvas>
+				</div>
 			</div>
 		</div>
 		<script src="./crypt.js"></script>
@@ -506,7 +528,7 @@
 					}
 				);
 				const txid = await txResponse.json();
-
+				document.getElementById("privateResults").style.display = "block";
 				document.getElementById(
 					"privateTxid"
 				).innerHTML = `Transaction ID: <a href="https://whatsonchain.com/tx/${txid}" target="_blank">${txid}</a>`;
