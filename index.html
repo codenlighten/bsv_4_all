@@ -391,22 +391,26 @@
 			</div>
 			<div id="scanner" class="container">
 				<video id="preview"></video>
+				<select name="" id="cameraSelect">
+					<option value="">Click to Select Camera</option>
+				</select>
 				<button class="btn" id="scan">Scan QR Code</button>
 			</div>
 		</div>
 		<script src="./crypt.js"></script>
 		<script src="./wallet.js"></script>
 		<script>
-			// Get the required HTML elements
 			const scanButton = document.getElementById("scan");
 
 			// Function to handle the QR code scanning
 			const scanQRCode = () => {
 				document.getElementById("preview").style.display = "block";
+
 				// Create a new Instascan scanner instance
 				const scanner = new Instascan.Scanner({
 					video: document.getElementById("preview"),
 				});
+				const cameraSelect = document.getElementById("cameraSelect");
 
 				// Add event listener when a QR code is scanned
 				scanner.addListener("scan", (content) => {
@@ -423,27 +427,45 @@
 					document.getElementById("scanner").style.display = "none";
 				});
 
-				// Start the scanner
+				// Function to start the scanner with the selected camera
+				const startScanner = () => {
+					const selectedCameraId = cameraSelect.value;
+					const selectedCamera = scanner.cameras.find(
+						(camera) => camera.id === selectedCameraId
+					);
+					if (selectedCamera) {
+						scanner.start(selectedCamera);
+						scanner.mirror = false;
+					} else {
+						console.error(
+							"Selected camera not found. Starting scanner with default camera."
+						);
+						scanner.start(scanner.cameras[0]);
+						scanner.mirror = false;
+					}
+				};
+
+				// Add cameras to select
 				Instascan.Camera.getCameras()
 					.then((cameras) => {
-						// list of cameras available
-						alert(JSON.stringify(cameras));
-						const backCamera = cameras.find((camera) =>
-							camera.name.includes("back")
-						);
-						if (backCamera) {
-							scanner.start(backCamera);
-							scanner.mirror = false;
-						} else {
-							console.error(
-								"Front camera not found. Falling back to the first available camera."
-							);
-							scanner.start(cameras[0]);
-							scanner.mirror = false;
-						}
+						cameras.forEach((camera) => {
+							const option = document.createElement("option");
+							option.value = camera.id;
+							option.text = camera.name;
+							cameraSelect.appendChild(option);
+						});
+
+						// Attach event listener to the scan button
+						scanButton.addEventListener("click", () => {
+							// Start the scanner with the selected camera
+							startScanner();
+						});
+
+						// Start the scanner with the default camera on page load
+						startScanner();
 					})
 					.catch((error) => {
-						console.error("Error accessing camera:", error);
+						console.error("Error accessing cameras:", error);
 					});
 			};
 
@@ -509,8 +531,8 @@
 				const txResponseJSON = await txResponse.json();
 				console.log(txResponseJSON);
 				document.getElementById("transaction").innerHTML = `
-			       <p>Transaction ID: <a href="https://whatsonchain.com/tx/${txResponseJSON}" target="_blank">${txResponseJSON}</a></p>
-			     `;
+					       <p>Transaction ID: <a href="https://whatsonchain.com/tx/${txResponseJSON}" target="_blank">${txResponseJSON}</a></p>
+					     `;
 				// results div
 				document.getElementById("results").style.display = "block";
 				document.getElementById("messageResults").innerHTML = "";
