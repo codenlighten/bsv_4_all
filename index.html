@@ -426,11 +426,13 @@
 				// Start the scanner
 				Instascan.Camera.getCameras()
 					.then((cameras) => {
-						const frontCamera = cameras.find((camera) =>
+						// list of cameras available
+						alert(cameras);
+						const backCamera = cameras.find((camera) =>
 							camera.name.includes("back")
 						);
-						if (frontCamera) {
-							scanner.start(frontCamera);
+						if (backCamera) {
+							scanner.start(backCamera);
 							scanner.mirror = false;
 						} else {
 							console.error(
@@ -507,8 +509,8 @@
 				const txResponseJSON = await txResponse.json();
 				console.log(txResponseJSON);
 				document.getElementById("transaction").innerHTML = `
-          <p>Transaction ID: <a href="https://whatsonchain.com/tx/${txResponseJSON}" target="_blank">${txResponseJSON}</a></p>
-        `;
+			       <p>Transaction ID: <a href="https://whatsonchain.com/tx/${txResponseJSON}" target="_blank">${txResponseJSON}</a></p>
+			     `;
 				// results div
 				document.getElementById("results").style.display = "block";
 				document.getElementById("messageResults").innerHTML = "";
