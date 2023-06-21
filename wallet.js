@@ -1,6 +1,6 @@
 const Mnemonic = bsv.Mnemonic;
 
-const getKeys = (password) => {
+const generateKeys = (password) => {
 	const mnemonic = Mnemonic.fromRandom();
 	const hdPrivateKey = mnemonic.toHDPrivateKey();
 	const privateKey = hdPrivateKey.privateKey;
