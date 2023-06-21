@@ -432,12 +432,18 @@
 				});
 
 				// Start the scanner with the default camera
-				startScanner();
 			};
 
 			// Function to start the scanner with the selected camera
-			const startScanner = () => {
+			const startScanner = (cameraSelection) => {
 				// Get the available cameras
+				let newCamera = null;
+				document.getElementById("preview").style.display = "block";
+
+				scanner = new Instascan.Scanner({
+					video: document.getElementById("preview"),
+				});
+
 				Instascan.Camera.getCameras()
 					.then((cameras) => {
 						// Clear the select list
@@ -451,7 +457,10 @@
 							cameraSelect.appendChild(option);
 						});
 
-						const selectedCameraId = cameraSelect.value;
+						let selectedCameraId = cameraSelect.value;
+						if (cameraSelection) {
+							selectedCameraId = cameraSelection;
+						}
 						const selectedCamera = cameras.find(
 							(camera) => camera.id === selectedCameraId
 						);
@@ -469,10 +478,24 @@
 					.catch((error) => {
 						console.error("Error accessing cameras:", error);
 					});
+				scanner.addListener("scan", (content) => {
+					// Get the recipient input element
+					const recipientInput = document.getElementById("recipient");
+
+					// Set the scanned QR code content as the recipient value
+					recipientInput.value = content;
+
+					// Stop the scanner
+					scanner.stop();
+
+					// Hide the scanner interface
+					document.getElementById("scanner").style.display = "none";
+				});
 			};
 
 			// Event listener for camera selection change
-			cameraSelect.addEventListener("change", () => {
+			cameraSelect.addEventListener("change", (e) => {
+				const camera = e.target.value;
 				// Stop the scanner
 				scanner.stop();
 
@@ -480,14 +503,13 @@
 				document.getElementById("preview").innerHTML = "";
 
 				// Start the scanner with the selected camera
-				startScanner();
+				startScanner(camera);
 			});
 
 			// Attach event listener to the scan button
-			scanButton.addEventListener("click", scanQRCode);
+			scanButton.addEventListener("click", startScanner);
 
 			// Attach event listener to the scan button
-			scanButton.addEventListener("click", scanQRCode);
 
 			document.getElementById("generateKeys").onclick = async () => {
 				if (
