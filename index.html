@@ -323,6 +323,9 @@
 			}
 			#preview {
 				display: none;
+				width: 90%;
+				max-width: 600px;
+				margin: 0 auto;
 			}
 		</style>
 		<title>BSV4All</title>
@@ -401,16 +404,17 @@
 		<script src="./wallet.js"></script>
 		<script>
 			const scanButton = document.getElementById("scan");
+			const cameraSelect = document.getElementById("cameraSelect");
+			let scanner = null; // Declare the scanner variable
 
 			// Function to handle the QR code scanning
 			const scanQRCode = () => {
 				document.getElementById("preview").style.display = "block";
 
 				// Create a new Instascan scanner instance
-				const scanner = new Instascan.Scanner({
+				scanner = new Instascan.Scanner({
 					video: document.getElementById("preview"),
 				});
-				const cameraSelect = document.getElementById("cameraSelect");
 
 				// Add event listener when a QR code is scanned
 				scanner.addListener("scan", (content) => {
@@ -427,27 +431,19 @@
 					document.getElementById("scanner").style.display = "none";
 				});
 
-				// Function to start the scanner with the selected camera
-				const startScanner = () => {
-					const selectedCameraId = cameraSelect.value;
-					const selectedCamera = scanner.cameras.find(
-						(camera) => camera.id === selectedCameraId
-					);
-					if (selectedCamera) {
-						scanner.start(selectedCamera);
-						scanner.mirror = false;
-					} else {
-						console.error(
-							"Selected camera not found. Starting scanner with default camera."
-						);
-						scanner.start(scanner.cameras[0]);
-						scanner.mirror = false;
-					}
-				};
+				// Start the scanner with the default camera
+				startScanner();
+			};
 
-				// Add cameras to select
+			// Function to start the scanner with the selected camera
+			const startScanner = () => {
+				// Get the available cameras
 				Instascan.Camera.getCameras()
 					.then((cameras) => {
+						// Clear the select list
+						cameraSelect.innerHTML = "";
+
+						// Iterate over the cameras and add options to the select list
 						cameras.forEach((camera) => {
 							const option = document.createElement("option");
 							option.value = camera.id;
@@ -455,19 +451,37 @@
 							cameraSelect.appendChild(option);
 						});
 
-						// Attach event listener to the scan button
-						scanButton.addEventListener("click", () => {
-							// Start the scanner with the selected camera
-							startScanner();
-						});
-
-						// Start the scanner with the default camera on page load
-						startScanner();
+						const selectedCameraId = cameraSelect.value;
+						const selectedCamera = cameras.find(
+							(camera) => camera.id === selectedCameraId
+						);
+						if (selectedCamera) {
+							scanner.start(selectedCamera);
+							scanner.mirror = false;
+						} else {
+							console.error(
+								"Selected camera not found. Starting scanner with default camera."
+							);
+							scanner.start(cameras[0]);
+							scanner.mirror = false;
+						}
 					})
 					.catch((error) => {
 						console.error("Error accessing cameras:", error);
 					});
 			};
+
+			// Event listener for camera selection change
+			cameraSelect.addEventListener("change", () => {
+				// Stop the scanner
+				scanner.stop();
+
+				// Clear the preview
+				document.getElementById("preview").innerHTML = "";
+
+				// Start the scanner with the selected camera
+				startScanner();
+			});
 
 			// Attach event listener to the scan button
 			scanButton.addEventListener("click", scanQRCode);
