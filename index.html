@@ -395,7 +395,12 @@
 			};
 
 			document.getElementById("sendBSV").onclick = async () => {
-				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				// const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				const password =
+					document.getElementById("keyPass") || prompt("Enter password");
+				if (!password) return alert("Please enter a password.");
+				const address = localStorage.getItem("address");
+				const wif = await retrieveWif(password);
 				const recipient = document.getElementById("recipient").value;
 				const amount = document.getElementById("amount").value;
 				const res = await fetch(
@@ -442,7 +447,11 @@
 			};
 
 			document.getElementById("sendMessage").onclick = async () => {
-				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				const password =
+					document.getElementById("keyPass") || prompt("Enter password");
+				if (!password) return alert("Please enter a password.");
+				const address = localStorage.getItem("address");
+				const wif = await retrieveWif(password);
 				// const amount = 1000; // Satoshis
 				let message = document.getElementById("message").value;
 				const optionalRecipient = document.getElementById("optionalRecipient");
@@ -508,9 +517,12 @@
 			};
 
 			document.getElementById("sendPrivateMoney").onclick = async () => {
-				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
-				// const amount = 1000; // Satoshis
-				const password = document.getElementById("privatePassword").value;
+				const password =
+					document.getElementById("keyPass") || prompt("Enter password");
+				if (!password) return alert("Please enter a password.");
+				const address = localStorage.getItem("address");
+				const wif = await retrieveWif(password);
+				const pass = document.getElementById("privatePassword").value;
 				const amount = document.getElementById("privateAmount").value;
 				const privateKey = new bsv.PrivateKey.fromRandom();
 				const publicKey = bsv.PublicKey.fromPrivateKey(privateKey);
@@ -525,12 +537,12 @@
 				};
 				const keyObject = JSON.stringify(keys);
 				console.log(keyObject);
-				if (!password || !amount) {
+				if (!pass || !amount) {
 					alert("Please enter a password and amount");
 					return;
 				}
-				const encrypted = await encrypt(password, keyObject);
-				const decrypted = await decrypt(password, encrypted);
+				const encrypted = await encrypt(pass, keyObject);
+				const decrypted = await decrypt(pass, encrypted);
 				console.log(encrypted, decrypted);
 				const res = await fetch(
 					`https://api.whatsonchain.com/v1/bsv/main/address/${address}/unspent`

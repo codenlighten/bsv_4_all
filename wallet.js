@@ -14,10 +14,18 @@ const generateKeys = async (password) => {
 		publicKey: publicKey.toString(),
 		wif: wif,
 	};
+	localStorage.address = address.toString();
 	localStorage.keys = JSON.stringify(keys);
 	const encryptedInfo = await encrypt(password, JSON.stringify(keys));
 	localStorage.encryptedInfo = encryptedInfo;
 	return keys;
+};
+
+const retrieveWif = (password) => {
+	const encryptedInfo = localStorage.encryptedInfo;
+	const info = JSON.parse(decrypt(password, encryptedInfo));
+	const wif = info.wif;
+	return wif;
 };
 
 const revealMnemonic = () => {
