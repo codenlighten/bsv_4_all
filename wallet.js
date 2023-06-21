@@ -1,6 +1,6 @@
 const Mnemonic = bsv.Mnemonic;
 
-const generateKeys = (password) => {
+const generateKeys = async (password) => {
 	const mnemonic = Mnemonic.fromRandom();
 	const hdPrivateKey = mnemonic.toHDPrivateKey();
 	const privateKey = hdPrivateKey.privateKey;
@@ -15,7 +15,7 @@ const generateKeys = (password) => {
 		wif: wif,
 	};
 	localStorage.keys = JSON.stringify(keys);
-	const encryptedInfo = encrypt(password, JSON.stringify(userObject));
+	const encryptedInfo = await encrypt(password, JSON.stringify(userObject));
 	localStorage.encryptedInfo = encryptedInfo;
 	return keys;
 };
