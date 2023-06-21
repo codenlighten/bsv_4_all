@@ -427,7 +427,7 @@
 				Instascan.Camera.getCameras()
 					.then((cameras) => {
 						// list of cameras available
-						alert(cameras);
+						alert(JSON.stringify(cameras));
 						const backCamera = cameras.find((camera) =>
 							camera.name.includes("back")
 						);
