@@ -481,9 +481,14 @@
 				scanner.addListener("scan", (content) => {
 					// Get the recipient input element
 					const recipientInput = document.getElementById("recipient");
-
+					let address = "";
+					if (content.includes("bitcoin:")) {
+						address = content.split("bitcoin:")[1];
+					} else {
+						address = content;
+					}
 					// Set the scanned QR code content as the recipient value
-					recipientInput.value = content;
+					recipientInput.value = address;
 
 					// Stop the scanner
 					scanner.stop();
