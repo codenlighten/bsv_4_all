@@ -1,26 +1,15 @@
 const getKeys = () => {
-	const privateKey = bsv.PrivateKey.fromRandom();
-	const publicKey = bsv.PublicKey.fromPrivateKey(privateKey);
-	const address = bsv.Address.fromPublicKey(publicKey);
+	const mnemonic = Mnemonic.fromRandom();
+	const hdPrivateKey = mnemonic.toHDPrivateKey();
+	const privateKey = hdPrivateKey.privateKey;
+	const publicKey = privateKey.toPublicKey();
+	const address = publicKey.toAddress();
 	const wif = privateKey.toWIF();
-	const pubKey = publicKey.toString();
-	const privKey = privateKey.toString();
-	const addr = address.toString();
-	console.log(
-		"private key",
-		privKey,
-		"public key",
-		pubKey,
-		"address",
-		addr,
-		"wif",
-		wif
-	);
 	const keys = {
-		privateKey: privKey,
-		publicKey: pubKey,
-		address: addr,
-		wif: wif,
+		address: address.toString(),
+		mnemonic: mnemonic.toString(),
+		privateKey: privateKey.toString(),
+		publicKey: publicKey.toString(),
 	};
 	return keys;
 };
