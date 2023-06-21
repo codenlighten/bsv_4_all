@@ -383,6 +383,8 @@
 				)
 					return;
 				const password = document.getElementById("keyPass").value;
+				if (!password) return alert("Please enter a password.");
+
 				const keys = await generateKeys(password);
 				alert("Keys generated and stored in local storage.");
 				// reload
