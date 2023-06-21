@@ -427,7 +427,7 @@
 				Instascan.Camera.getCameras()
 					.then((cameras) => {
 						const frontCamera = cameras.find((camera) =>
-							camera.name.includes("front")
+							camera.name.includes("back")
 						);
 						if (frontCamera) {
 							scanner.start(frontCamera);
