@@ -71,22 +71,7 @@ const createWallet = () => {
 // Store mnemonic in localStorage
 
 if (!localStorage.encryptedInfo) {
-	const mnemonic = Mnemonic.fromRandom();
-	const password = prompt("Enter a password");
-	const hdPrivateKey = mnemonic.toHDPrivateKey();
-	const privateKey = hdPrivateKey.privateKey;
-	const publicKey = privateKey.toPublicKey();
-	const address = publicKey.toAddress();
-
-	const userObject = {
-		address: address.toString(),
-		mnemonic: mnemonic.toString(),
-		privateKey: privateKey.toString(),
-		publicKey: publicKey.toString(),
-	};
-	localStorage.userObject = JSON.stringify(userObject);
-	const encryptedInfo = encrypt(password, JSON.stringify(userObject));
-	localStorage.encryptedInfo = encryptedInfo;
+	document.getElementById("generate").style.display = "block";
 }
 
 const retrieveKeys = () => {
