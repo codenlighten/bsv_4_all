@@ -639,8 +639,8 @@
 				} BSV`;
 			};
 			if (localStorage.address) {
-				// create qr code of address
-				// const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				document.getElementById("keys").style.display = "block";
+
 				const address = localStorage.getItem("address");
 				balance(address);
 				const qr = new QRious({
