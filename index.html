@@ -420,15 +420,9 @@
 				scanner.addListener("scan", (content) => {
 					// Get the recipient input element
 					const recipientInput = document.getElementById("recipient");
-					let address = "";
-					if (content.includes("bitcoin:")) {
-						address = content.split("bitcoin:")[1];
-					} else {
-						address = content;
-					}
 
 					// Set the scanned QR code content as the recipient value
-					recipientInput.value = address;
+					recipientInput.value = content;
 
 					// Stop the scanner
 					scanner.stop();
@@ -488,6 +482,9 @@
 				// Start the scanner with the selected camera
 				startScanner();
 			});
+
+			// Attach event listener to the scan button
+			scanButton.addEventListener("click", scanQRCode);
 
 			// Attach event listener to the scan button
 			scanButton.addEventListener("click", scanQRCode);
