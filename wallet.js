@@ -15,7 +15,7 @@ const generateKeys = async (password) => {
 		wif: wif,
 	};
 	localStorage.address = address.toString();
-	localStorage.keys = JSON.stringify(keys);
+	// localStorage.keys = JSON.stringify(keys);
 	const encryptedInfo = await encrypt(password, JSON.stringify(keys));
 	localStorage.encryptedInfo = encryptedInfo;
 	return keys;
@@ -47,17 +47,6 @@ const revealMnemonic = () => {
 	}
 };
 
-if (localStorage.userObject) {
-	const userObject = JSON.parse(localStorage.userObject);
-	// document.getElementById("address").innerHTML = userObject.address;
-	// document.getElementById("mnemonic").innerHTML = "***Reveal Mnemonic***";
-}
-
-const randomAddress = () => {
-	const keys = getKeys();
-	console.log(keys);
-};
-
 const createWallet = () => {
 	const mnemonic = Mnemonic.fromRandom();
 	const password = prompt("Enter a password");
@@ -87,19 +76,18 @@ const retrieveKeys = () => {
 	const encryptedInfo = localStorage.encryptedInfo;
 	const info = JSON.parse(decrypt(password, encryptedInfo));
 	const mnemonic = info.mnemonic;
-	const hdPrivateKey = Mnemonic.fromString(mnemonic).toHDPrivateKey();
-	const privateKey = hdPrivateKey.privateKey;
-	const publicKey = privateKey.toPublicKey();
-	const address = publicKey.toAddress();
-
-	const userObject = {
-		address: address.toString(),
-		mnemonic: mnemonic.toString(),
-		privateKey: privateKey.toString(),
-		publicKey: publicKey.toString(),
+	const privateKey = info.privateKey;
+	const publicKey = info.publicKey;
+	const address = info.address;
+	const wif = info.wif;
+	const keys = {
+		address: address,
+		mnemonic: mnemonic,
+		privateKey: privateKey,
+		publicKey: publicKey,
+		wif: wif,
 	};
-	console.log(userObject);
-	return userObject;
+	return keys;
 };
 
 // retrieveKeys();

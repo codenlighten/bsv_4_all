@@ -276,6 +276,11 @@
 				max-width: 600px;
 				padding: 20px;
 			}
+			#keyPass {
+				width: 100%;
+				max-width: 600px;
+				padding: 20px;
+			}
 			#privateMoney button {
 				background-color: #363299;
 				border: none;
@@ -324,18 +329,18 @@
 			<div class="container" id="keys">
 				<div id="address"></div>
 				<div id="balance"></div>
-				<div id="wif"></div>
+				<div id="mnemonic"></div>
 				<canvas id="qrcode"></canvas>
 			</div>
 			<div id="generate" class="container">
-				<input
-					required
-					placeholder="enter password"
-					type="password"
-					id="keyPass"
-				/>
 				<button class="btn" id="generateKeys">Generate Keys</button>
 			</div>
+			<input
+				required
+				placeholder="enter password"
+				type="password"
+				id="keyPass"
+			/>
 			<div id="messageContainer" class="container">
 				<label for="">Encrypt Message?</label>
 				<input type="checkbox" id="encryptMessage" />
@@ -344,6 +349,11 @@
 					placeholder="optionalRecipient"
 					type="text"
 					id="optionalRecipient"
+				/>
+				<input
+					placeholder="optional encrypted key"
+					type="password"
+					id="optionalEncryptedKey"
 				/>
 				<button class="btn" id="sendMessage">Send Message</button>
 			</div>
@@ -397,7 +407,7 @@
 			document.getElementById("sendBSV").onclick = async () => {
 				// const { address, wif } = JSON.parse(localStorage.getItem("keys"));
 				const password =
-					document.getElementById("keyPass") || prompt("Enter password");
+					document.getElementById("keyPass").value || prompt("Enter password");
 				if (!password) return alert("Please enter a password.");
 				const address = localStorage.getItem("address");
 				const wif = await retrieveWif(password);
@@ -448,19 +458,25 @@
 
 			document.getElementById("sendMessage").onclick = async () => {
 				const password =
-					document.getElementById("keyPass") || prompt("Enter password");
-				if (!password) return alert("Please enter a password.");
+					document.getElementById("keyPass").value || prompt("Enter password");
+				if (!password) return alert("Please enter your password.");
 				const address = localStorage.getItem("address");
 				const wif = await retrieveWif(password);
 				// const amount = 1000; // Satoshis
 				let message = document.getElementById("message").value;
 				const optionalRecipient = document.getElementById("optionalRecipient");
+
+				if (optionalRecipient.value) {
+					message = `${optionalRecipient.value} ${message}`;
+				}
 				const encryptionCheck =
 					document.getElementById("encryptMessage").checked;
 				console.log(encryptionCheck);
 				if (encryptionCheck) {
-					const password = prompt("Enter password to encrypt message");
-					message = await encrypt(password, message);
+					const optionalEncryptedKey =
+						document.getElementById("optionalEncryptedKey").value ||
+						prompt("Enter password to encrypt message");
+					message = await encrypt(optionalEncryptedKey, message);
 				}
 				console.log(message);
 				const res = await fetch(
@@ -518,7 +534,7 @@
 
 			document.getElementById("sendPrivateMoney").onclick = async () => {
 				const password =
-					document.getElementById("keyPass") || prompt("Enter password");
+					document.getElementById("keyPass").value || prompt("Enter password");
 				if (!password) return alert("Please enter a password.");
 				const address = localStorage.getItem("address");
 				const wif = await retrieveWif(password);
@@ -622,9 +638,10 @@
 					balanceJSON.unconfirmed / 100000000
 				} BSV`;
 			};
-			if (localStorage.keys) {
+			if (localStorage.address) {
 				// create qr code of address
-				const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				// const { address, wif } = JSON.parse(localStorage.getItem("keys"));
+				const address = localStorage.getItem("address");
 				balance(address);
 				const qr = new QRious({
 					element: document.getElementById("qrcode"),
@@ -634,13 +651,22 @@
 				document.getElementById(
 					"address"
 				).innerHTML = `<a href="bitcoin:${address}">Click to fund: ${address}</a>`;
-				const wifEl = document.getElementById("wif");
-				wifEl.innerHTML = `*****Reveal WIF****`;
-				wifEl.onclick = () => {
-					if (wifEl.innerHTML.includes("Reveal")) {
-						wifEl.innerHTML = `Private WIF: ${wif}`;
+				const mnemonic = document.getElementById("mnemonic");
+				mnemonic.innerHTML = `*****Reveal Mnemonic****`;
+				mnemonic.onclick = () => {
+					if (mnemonic.innerHTML.includes("Reveal")) {
+						const password =
+							document.getElementById("keyPass").value ||
+							prompt("Enter your password");
+						if (!password) return alert("Please enter a password");
+						const encryptedInfo = localStorage.getItem("encryptedInfo");
+						const decrypted = decrypt(password, encryptedInfo);
+						console.log(decrypted);
+						const { mnemonic } = JSON.parse(decrypted);
+						console.log(mnemonic);
+						document.getElementById("mnemonic").innerHTML = mnemonic;
 					} else {
-						wifEl.innerHTML = `*****Reveal WIF****`;
+						mnemonic.innerHTML = `*****Reveal Mnemonic****`;
 					}
 				};
 			}
