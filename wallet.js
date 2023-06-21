@@ -15,7 +15,7 @@ const generateKeys = async (password) => {
 		wif: wif,
 	};
 	localStorage.keys = JSON.stringify(keys);
-	const encryptedInfo = await encrypt(password, JSON.stringify(userObject));
+	const encryptedInfo = await encrypt(password, JSON.stringify(keys));
 	localStorage.encryptedInfo = encryptedInfo;
 	return keys;
 };
