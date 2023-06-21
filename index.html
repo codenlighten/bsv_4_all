@@ -424,14 +424,25 @@
 				});
 
 				// Start the scanner
-				Instascan.Camera.getCameras().then((cameras) => {
-					if (cameras.length > 0) {
-						scanner.start(cameras[0]);
-						scanner.mirror = false;
-					} else {
-						console.error("No cameras found.");
-					}
-				});
+				Instascan.Camera.getCameras()
+					.then((cameras) => {
+						const frontCamera = cameras.find((camera) =>
+							camera.name.includes("front")
+						);
+						if (frontCamera) {
+							scanner.start(frontCamera);
+							scanner.mirror = false;
+						} else {
+							console.error(
+								"Front camera not found. Falling back to the first available camera."
+							);
+							scanner.start(cameras[0]);
+							scanner.mirror = false;
+						}
+					})
+					.catch((error) => {
+						console.error("Error accessing camera:", error);
+					});
 			};
 
 			// Attach event listener to the scan button
