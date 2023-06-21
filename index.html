@@ -325,6 +325,12 @@
 				<canvas id="qrcode"></canvas>
 			</div>
 			<div id="generate" class="container">
+				<input
+					required
+					placeholder="enter password"
+					type="password"
+					id="keyPass"
+				/>
 				<button class="btn" id="generateKeys">Generate Keys</button>
 			</div>
 			<div id="messageContainer" class="container">
@@ -376,17 +382,8 @@
 					) == false
 				)
 					return;
-				const privateKey = new bsv.PrivateKey.fromRandom();
-				const publicKey = bsv.PublicKey.fromPrivateKey(privateKey);
-				const address = bsv.Address.fromPrivateKey(privateKey).toString();
-				const wif = privateKey.toWIF();
-				const keys = {
-					privateKey: privateKey.toString(),
-					publicKey: publicKey.toString(),
-					address,
-					wif,
-				};
-				localStorage.setItem("keys", JSON.stringify(keys));
+				const password = document.getElementById("keyPass").value;
+				const keys = await generateKeys(password);
 				alert("Keys generated and stored in local storage.");
 				// reload
 				location.reload();

@@ -1,4 +1,6 @@
-const getKeys = () => {
+const Mnemonic = bsv.Mnemonic;
+
+const getKeys = (password) => {
 	const mnemonic = Mnemonic.fromRandom();
 	const hdPrivateKey = mnemonic.toHDPrivateKey();
 	const privateKey = hdPrivateKey.privateKey;
@@ -10,10 +12,13 @@ const getKeys = () => {
 		mnemonic: mnemonic.toString(),
 		privateKey: privateKey.toString(),
 		publicKey: publicKey.toString(),
+		wif: wif,
 	};
+	localStorage.keys = JSON.stringify(keys);
+	const encryptedInfo = encrypt(password, JSON.stringify(userObject));
+	localStorage.encryptedInfo = encryptedInfo;
 	return keys;
 };
-const Mnemonic = bsv.Mnemonic;
 
 const revealMnemonic = () => {
 	const mnemonic = document.getElementById("mnemonic");
@@ -53,14 +58,14 @@ const createWallet = () => {
 	const publicKey = privateKey.toPublicKey();
 	const address = publicKey.toAddress();
 
-	const userObject = {
+	const keys = {
 		address: address.toString(),
 		mnemonic: mnemonic.toString(),
 		privateKey: privateKey.toString(),
 		publicKey: publicKey.toString(),
 	};
-	const encryptedInfo = encrypt(password, JSON.stringify(userObject));
-	return encryptedInfo;
+	const encryptedKeys = encrypt(password, JSON.stringify(keys));
+	return encryptedKeys;
 };
 
 // Store mnemonic in localStorage
